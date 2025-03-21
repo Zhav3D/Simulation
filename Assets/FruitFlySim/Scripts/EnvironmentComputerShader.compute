@@ -1,0 +1,59 @@
+#pragma kernel RenderEnvironment
+
+struct EnvironmentVisData
+{
+    float3 position;
+    float4 color;
+    float temperature;
+    float oxygen;
+    float nutrients;
+};
+
+RWTexture2D<float4> Result;
+StructuredBuffer<EnvironmentVisData> environmentRegions;
+int regionCount;
+float worldBounds;
+
+[numthreads(8, 8, 1)]
+void RenderEnvironment(uint3 id : SV_DispatchThreadID)
+{
+    // Convert pixel coordinates to world space
+    float2 uv = float2(id.xy) / float2(256, 256);
+    float3 worldPos = float3((uv.x * 2 - 1) * worldBounds / 2, (uv.y * 2 - 1) * worldBounds / 2, 0);
+    
+    // Start with background color
+    float4 color = float4(0.1, 0.1, 0.1, 1.0);
+    float totalInfluence = 0.0;
+    
+    // For each environment region
+    for (int i = 0; i < regionCount; i++)
+    {
+        EnvironmentVisData region = environmentRegions[i];
+        
+        // Calculate distance (2D for visualization)
+        float2 regionPos2D = region.position.xy;
+        float dist = distance(worldPos.xy, regionPos2D);
+        
+        // Define influence radius
+        float radius = 20.0;
+        
+        if (dist < radius)
+        {
+            // Calculate influence factor
+            float influence = 1.0 - (dist / radius);
+            influence = influence * influence; // Square for smoother falloff
+            
+            // Add weighted color
+            color += region.color * influence;
+            totalInfluence += influence;
+        }
+    }
+    
+    // Normalize color if needed
+    if (totalInfluence > 0.0)
+    {
+        color = color / (1.0 + totalInfluence);
+    }
+    
+    Result[id.xy] = color;
+}
