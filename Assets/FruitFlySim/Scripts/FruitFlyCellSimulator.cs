@@ -121,7 +121,7 @@ public class FruitFlyCellSimulator : MonoBehaviour
     private void SimulateCells(float deltaTime)
     {
         // 1. Cell Behavior Job - determines individual cell actions
-        var cellBehaviorJob = new CellBehaviorJob
+        var cellBehaviorJob = new CellBehaviorJob((uint)System.DateTime.Now.Ticks)
         {
             cellData = cellData,
             deltaTime = deltaTime,
@@ -326,6 +326,16 @@ public struct CellBehaviorJob : IJobParallelFor
     public float deltaTime;
     public float worldBounds;
 
+    private Unity.Mathematics.Random random;
+
+    public CellBehaviorJob(uint seed)
+    {
+        this.cellData = default;
+        this.deltaTime = default;
+        this.worldBounds = default;
+        this.random = new Unity.Mathematics.Random(seed);
+    }
+
     public void Execute(int index)
     {
         CellData cell = cellData[index];
@@ -401,12 +411,13 @@ public struct CellBehaviorJob : IJobParallelFor
 
             case CellType.Immune:
                 // Immune cells move more actively
-                if (UnityEngine.Random.value < 0.05f)
+                if (random.NextFloat() < 0.05f)
                 {
+                    // Random velocity changes, etc.
                     cell.velocity = new float3(
-                        UnityEngine.Random.Range(-1f, 1f),
-                        UnityEngine.Random.Range(-1f, 1f),
-                        UnityEngine.Random.Range(-1f, 1f)
+                        random.NextFloat(-1f, 1f),
+                        random.NextFloat(-1f, 1f),
+                        random.NextFloat(-1f, 1f)
                     ) * 2f;
                 }
                 break;

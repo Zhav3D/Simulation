@@ -1,4 +1,8 @@
 // Cluster visualization component
+using System.Collections.Generic;
+using Unity.Collections;
+using UnityEngine;
+
 public class CellClusterController : MonoBehaviour
 {
     public int cellCount;

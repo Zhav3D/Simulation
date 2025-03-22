@@ -175,7 +175,7 @@ public class FruitFlySimulationController : MonoBehaviour
     {
         // Setup cell visualization
         int maxCells = cellSimulator.initialCellCount;
-        cellBuffer = new ComputeBuffer(maxCells, 28); // float3 position, float size, float4 color
+        cellBuffer = new ComputeBuffer(maxCells, 32); // float3 position, float size, float4 color
         cellTypeBuffer = new ComputeBuffer(cellTypeColors.Length, 16); // float4 colors
         cellTypeBuffer.SetData(cellTypeColors);
 
@@ -184,7 +184,7 @@ public class FruitFlySimulationController : MonoBehaviour
         environmentTexture.enableRandomWrite = true;
         environmentTexture.Create();
 
-        environmentBuffer = new ComputeBuffer(environmentController.environmentRegionCount, 32);
+        environmentBuffer = new ComputeBuffer(environmentController.environmentRegionCount, 40);
     }
 
     private void UpdateSimulationParameters()
