@@ -62,6 +62,7 @@ public class OptimizedParticleSimulation : MonoBehaviour
     private NativeArray<ParticleData> particleDataArray;
     private NativeArray<float> interactionMatrix;
     private NativeArray<float3> forceArray;
+    private NativeArray<ParticleData> tempParticleDataArray;
 
     // Cached transform references for performance
     private Transform[] particleTransforms;
@@ -102,6 +103,7 @@ public class OptimizedParticleSimulation : MonoBehaviour
     {
         // Clean up native arrays
         if (particleDataArray.IsCreated) particleDataArray.Dispose();
+        if (tempParticleDataArray.IsCreated) tempParticleDataArray.Dispose(); // Clean up temp array
         if (interactionMatrix.IsCreated) interactionMatrix.Dispose();
         if (forceArray.IsCreated) forceArray.Dispose();
     }
@@ -184,6 +186,7 @@ public class OptimizedParticleSimulation : MonoBehaviour
 
         // Create native arrays
         particleDataArray = new NativeArray<ParticleData>(particleCount, Allocator.Persistent);
+        tempParticleDataArray = new NativeArray<ParticleData>(particleCount, Allocator.Persistent); // Add temp array
         interactionMatrix = new NativeArray<float>(typeCount * typeCount, Allocator.Persistent);
         forceArray = new NativeArray<float3>(particleCount, Allocator.Persistent);
 
@@ -260,28 +263,43 @@ public class OptimizedParticleSimulation : MonoBehaviour
             particles = particleDataArray
         };
 
-        // Add collision detection and resolution
-        var collisionJob = new ParticleCollisionJob
-        {
-            particles = particleDataArray,
-            minDistance = minDistance,
-            elasticity = collisionElasticity
-        };
-
-        // Schedule and complete jobs
+        // Schedule and complete force and update jobs
         var forceHandle = forceJob.Schedule(particles.Count, 64);
         var updateHandle = updateJob.Schedule(particles.Count, 64, forceHandle);
+        updateHandle.Complete();
+
+        // Copy initial data to temp array
+        tempParticleDataArray.CopyFrom(particleDataArray);
+
+        // Track which array has the most recent data
+        bool finalDataInMainArray = true;
 
         // Run the collision job for a few iterations to resolve penetrations
         int collisionIterations = 3; // More iterations = more stable but slower
-        var collisionHandle = updateHandle;
 
+        // Run collision iterations with double buffering
         for (int i = 0; i < collisionIterations; i++)
         {
-            collisionHandle = collisionJob.Schedule(particles.Count, 64, collisionHandle);
+            var collisionJob = new ParticleCollisionJob
+            {
+                inputParticles = finalDataInMainArray ? particleDataArray : tempParticleDataArray,
+                outputParticles = finalDataInMainArray ? tempParticleDataArray : particleDataArray,
+                minDistance = minDistance,
+                elasticity = collisionElasticity
+            };
+
+            // Complete the job
+            collisionJob.Schedule(particles.Count, 64).Complete();
+
+            // Toggle which array has the latest data
+            finalDataInMainArray = !finalDataInMainArray;
         }
 
-        collisionHandle.Complete();
+        // If final data is in temp array, copy back to main array
+        if (!finalDataInMainArray)
+        {
+            particleDataArray.CopyFrom(tempParticleDataArray);
+        }
     }
 
     private void UpdateParticles(float deltaTime)
@@ -754,21 +772,25 @@ public struct ParticleUpdateJob : IJobParallelFor
 [BurstCompile]
 public struct ParticleCollisionJob : IJobParallelFor
 {
-    public NativeArray<ParticleData> particles;
-    [ReadOnly] public float minDistance; // Use the same minDistance from settings
-    [ReadOnly] public float elasticity; // Collision elasticity (0-1)
+    [ReadOnly] public NativeArray<ParticleData> inputParticles;
+    public NativeArray<ParticleData> outputParticles;
+    [ReadOnly] public float minDistance;
+    [ReadOnly] public float elasticity;
 
     public void Execute(int indexA)
     {
-        ParticleData particleA = particles[indexA];
+        // Start with the input data for our output
+        ParticleData particleA = inputParticles[indexA];
+        outputParticles[indexA] = particleA;
+
         float3 posA = particleA.position;
         float radiusA = particleA.radius;
 
-        for (int indexB = 0; indexB < particles.Length; indexB++)
+        for (int indexB = 0; indexB < inputParticles.Length; indexB++)
         {
             if (indexA == indexB) continue;
 
-            ParticleData particleB = particles[indexB];
+            ParticleData particleB = inputParticles[indexB];
             float3 posB = particleB.position;
             float radiusB = particleB.radius;
 
@@ -780,29 +802,30 @@ public struct ParticleCollisionJob : IJobParallelFor
             // If particles are overlapping
             if (distance < collisionDistance && distance > 0.001f)
             {
+                // Get our current output particle
+                ParticleData outputParticle = outputParticles[indexA];
+
                 // Calculate penetration depth
                 float penetrationDepth = collisionDistance - distance;
                 float3 normal = math.normalize(direction);
 
-                // Calculate separation based on inverse mass ratio (to respect conservation of momentum)
+                // Calculate separation based on inverse mass ratio
                 float totalMass = particleA.mass + particleB.mass;
                 float ratioA = particleB.mass / totalMass;
 
-                // Move our particle away from the collision
-                // Note: In a job system, we can't directly modify particleB's position here
-                // since another job might be working on it. This is a simplified approach.
-                particleA.position -= normal * penetrationDepth * ratioA;
+                // Apply position correction
+                outputParticle.position -= normal * penetrationDepth * ratioA;
 
-                // Optional: Apply collision response (elasticity)
+                // Apply collision response (elasticity)
                 float3 relativeVelocity = particleB.velocity - particleA.velocity;
                 float impulse = (-(1 + elasticity) * math.dot(relativeVelocity, normal)) /
                                (1 / particleA.mass + 1 / particleB.mass);
 
                 // Apply impulse to our particle only
-                particleA.velocity -= normal * (impulse / particleA.mass);
+                outputParticle.velocity -= normal * (impulse / particleA.mass);
 
-                // Update particle data
-                particles[indexA] = particleA;
+                // Update the output particle
+                outputParticles[indexA] = outputParticle;
             }
         }
     }
