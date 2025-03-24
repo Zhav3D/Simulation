@@ -621,7 +621,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   initialCellCount: 5000
-  worldBounds: 100
+  worldBounds: 500
   simulationSpeed: 1
   interactionRadius: 2
   epithelialCellRatio: 0.3

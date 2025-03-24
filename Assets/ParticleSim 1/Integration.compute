@@ -1,0 +1,103 @@
+// Integration.compute
+#pragma kernel Integration
+
+struct ParticleData
+{
+    float3 position;
+    float3 velocity;
+    float3 force;
+    int typeIndex;
+    float mass;
+    float radius;
+};
+
+RWStructuredBuffer<ParticleData> ParticleBuffer;
+int ParticleCount;
+float DeltaTime;
+float Dampening;
+float BounceForce;
+float MaxVelocity;
+float3 HalfBounds;
+
+[numthreads(64, 1, 1)]
+void Integration(uint3 id : SV_DispatchThreadID)
+{
+    uint index = id.x;
+    if (index >= (uint) ParticleCount)
+        return;
+    
+    ParticleData particle = ParticleBuffer[index];
+    
+    // Apply force as acceleration (F = ma)
+    float3 acceleration = particle.force / particle.mass;
+    
+    // Cap acceleration
+    float maxAccel = 50.0f;
+    float accelLengthSq = dot(acceleration, acceleration);
+    if (accelLengthSq > maxAccel * maxAccel)
+    {
+        acceleration = normalize(acceleration) * maxAccel;
+    }
+    
+    // Update velocity
+    particle.velocity += acceleration * DeltaTime;
+    
+    // Apply dampening
+    particle.velocity *= Dampening;
+    
+    // Cap velocity
+    float velocityLengthSq = dot(particle.velocity, particle.velocity);
+    if (velocityLengthSq > MaxVelocity * MaxVelocity)
+    {
+        particle.velocity = normalize(particle.velocity) * MaxVelocity;
+    }
+    
+    // Update position
+    particle.position += particle.velocity * DeltaTime;
+    
+    // Boundary handling
+    float3 position = particle.position;
+    float radius = particle.radius;
+    
+    // X boundaries
+    if (position.x < -HalfBounds.x + radius)
+    {
+        position.x = -HalfBounds.x + radius;
+        particle.velocity.x = -particle.velocity.x * BounceForce;
+    }
+    else if (position.x > HalfBounds.x - radius)
+    {
+        position.x = HalfBounds.x - radius;
+        particle.velocity.x = -particle.velocity.x * BounceForce;
+    }
+    
+    // Y boundaries
+    if (position.y < -HalfBounds.y + radius)
+    {
+        position.y = -HalfBounds.y + radius;
+        particle.velocity.y = -particle.velocity.y * BounceForce;
+    }
+    else if (position.y > HalfBounds.y - radius)
+    {
+        position.y = HalfBounds.y - radius;
+        particle.velocity.y = -particle.velocity.y * BounceForce;
+    }
+    
+    // Z boundaries
+    if (position.z < -HalfBounds.z + radius)
+    {
+        position.z = -HalfBounds.z + radius;
+        particle.velocity.z = -particle.velocity.z * BounceForce;
+    }
+    else if (position.z > HalfBounds.z - radius)
+    {
+        position.z = HalfBounds.z - radius;
+        particle.velocity.z = -particle.velocity.z * BounceForce;
+    }
+    
+    // Update position in particle data
+    particle.position = position;
+    
+    // Write updated particle back to buffer
+    ParticleBuffer[index] = particle;
+}

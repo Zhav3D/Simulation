@@ -150,8 +150,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   simulationSpeed: 1
   collisionElasticity: 0.5
-  simulationBounds: {x: 40, y: 40, z: 40}
-  dampening: 0.999
+  simulationBounds: {x: 100, y: 100, z: 100}
+  dampening: 0.9999
   interactionStrength: 0.2
   minDistance: 0.5
   bounceForce: 0.95
@@ -165,18 +165,28 @@ MonoBehaviour:
   - name: Red
     color: {r: 1, g: 0.079807915, b: 0, a: 1}
     mass: 1
-    radius: 0.09
-    spawnAmount: 400
+    radius: 0.1
+    spawnAmount: 500
   - name: Yellow
     color: {r: 1, g: 0.9735143, b: 0, a: 1}
     mass: 1
     radius: 0.1
-    spawnAmount: 50
+    spawnAmount: 100
   - name: Green
     color: {r: 0.10298407, g: 1, b: 0, a: 1}
     mass: 1
-    radius: 0.05
-    spawnAmount: 3000
+    radius: 0.1
+    spawnAmount: 1000
+  - name: Pink
+    color: {r: 0.7363515, g: 0, b: 1, a: 1}
+    mass: 1
+    radius: 0.1
+    spawnAmount: 300
+  - name: Blue
+    color: {r: 0, g: 0.46388245, b: 1, a: 1}
+    mass: 1
+    radius: 0.1
+    spawnAmount: 20
   interactionRules:
   - typeIndexA: 0
     typeIndexB: 1
@@ -186,10 +196,10 @@ MonoBehaviour:
     attractionValue: 0
   - typeIndexA: 2
     typeIndexB: 0
-    attractionValue: -0.2
+    attractionValue: -0.6
   - typeIndexA: 1
     typeIndexB: 0
-    attractionValue: 0.1
+    attractionValue: 0.3
   - typeIndexA: 1
     typeIndexB: 2
     attractionValue: 1
@@ -198,10 +208,34 @@ MonoBehaviour:
     attractionValue: -0.2
   - typeIndexA: 2
     typeIndexB: 2
-    attractionValue: -0.1
+    attractionValue: 0
   - typeIndexA: 1
     typeIndexB: 1
     attractionValue: 0
+  - typeIndexA: 2
+    typeIndexB: 3
+    attractionValue: 0.2
+  - typeIndexA: 2
+    typeIndexB: 4
+    attractionValue: -0.1
+  - typeIndexA: 3
+    typeIndexB: 0
+    attractionValue: 0
+  - typeIndexA: 3
+    typeIndexB: 3
+    attractionValue: 0.1
+  - typeIndexA: 4
+    typeIndexB: 3
+    attractionValue: 3
+  - typeIndexA: 4
+    typeIndexB: 4
+    attractionValue: 0.1
+  - typeIndexA: 3
+    typeIndexB: 4
+    attractionValue: -0.1
+  - typeIndexA: 4
+    typeIndexB: 1
+    attractionValue: -0.3
   particlePrefab: {fileID: 8385162901755805872, guid: 1182d3be23cfeb14aa737eef85a8733c, type: 3}
 --- !u!4 &246224068
 Transform:

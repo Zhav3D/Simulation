@@ -1,0 +1,218 @@
+// Collision.compute
+#pragma kernel Collision
+
+struct ParticleData
+{
+    float3 position;
+    float3 velocity;
+    float3 force;
+    int typeIndex;
+    float mass;
+    float radius;
+};
+
+struct GridCellData
+{
+    int startIndex;
+    int count;
+};
+
+struct GridOccupancyData
+{
+    int cellIndex;
+    int particleIndex;
+};
+
+RWStructuredBuffer<ParticleData> ParticleBuffer;
+RWStructuredBuffer<GridCellData> GridCellBuffer;
+RWStructuredBuffer<GridOccupancyData> GridOccupancyBuffer;
+int ParticleCount;
+float Elasticity;
+float3 GridDimensions;
+float3 CellSize;
+float3 SimulationBounds;
+bool UseGridPartitioning;
+
+// Helper function to calculate grid cell index from world position
+int GetCellIndex(float3 position)
+{
+    // Adjust position to grid space (0 to gridDimension)
+    float3 gridPos = position + SimulationBounds * 0.5f;
+    gridPos /= CellSize;
+    
+    // Clamp to grid bounds
+    int3 cellPos = int3(gridPos);
+    cellPos = clamp(cellPos, int3(0, 0, 0), int3(GridDimensions) - int3(1, 1, 1));
+    
+    // Calculate 1D index from 3D position
+    return cellPos.x + cellPos.y * GridDimensions.x + cellPos.z * GridDimensions.x * GridDimensions.y;
+}
+
+// Get neighboring cell indices (including current cell)
+void GetNeighboringCells(float3 position, out int cellIndices[27], out int cellCount)
+{
+    // Calculate center cell position in grid space
+    float3 gridPos = position + SimulationBounds * 0.5f;
+    gridPos /= CellSize;
+    int3 centerCellPos = int3(gridPos);
+    
+    cellCount = 0;
+    
+    // Check all 27 neighboring cells (3x3x3 neighborhood)
+    for (int z = -1; z <= 1; z++)
+    {
+        for (int y = -1; y <= 1; y++)
+        {
+            for (int x = -1; x <= 1; x++)
+            {
+                int3 neighborPos = centerCellPos + int3(x, y, z);
+                
+                // Skip cells outside the grid bounds
+                if (neighborPos.x < 0 || neighborPos.x >= GridDimensions.x ||
+                    neighborPos.y < 0 || neighborPos.y >= GridDimensions.y ||
+                    neighborPos.z < 0 || neighborPos.z >= GridDimensions.z)
+                {
+                    continue;
+                }
+                
+                // Calculate cell index and add to list
+                int cellIndex = neighborPos.x + neighborPos.y * GridDimensions.x +
+                                neighborPos.z * GridDimensions.x * GridDimensions.y;
+                cellIndices[cellCount++] = cellIndex;
+            }
+        }
+    }
+}
+
+[numthreads(64, 1, 1)]
+void Collision(uint3 id : SV_DispatchThreadID)
+{
+    uint index = id.x;
+    if (index >= (uint) ParticleCount)
+        return;
+    
+    ParticleData particleA = ParticleBuffer[index];
+    float3 posA = particleA.position;
+    float radiusA = particleA.radius;
+    
+    if (UseGridPartitioning)
+    {
+        // Get neighboring cells
+        int cellIndices[27];
+        int cellCount;
+        GetNeighboringCells(posA, cellIndices, cellCount);
+        
+        // Process particles in neighboring cells
+        for (int c = 0; c < cellCount; c++)
+        {
+            int cellIndex = cellIndices[c];
+            GridCellData cell = GridCellBuffer[cellIndex];
+            
+            // Skip empty cells
+            if (cell.count == 0)
+                continue;
+            
+            // Process particles in this cell
+            for (int j = 0; j < cell.count; j++)
+            {
+                int occupancyIndex = cell.startIndex + j;
+                if (occupancyIndex >= 0 && occupancyIndex < ParticleCount)
+                {
+                    int otherIndex = GridOccupancyBuffer[occupancyIndex].particleIndex;
+                    
+                    // Skip self-collision
+                    if (otherIndex == index)
+                        continue;
+                    
+                    ParticleData particleB = ParticleBuffer[otherIndex];
+                    float3 posB = particleB.position;
+                    float radiusB = particleB.radius;
+                    
+                    // Calculate direction and distance
+                    float3 direction = posB - posA;
+                    float distance = length(direction);
+                    float minDist = radiusA + radiusB;
+                    
+                    // If particles are overlapping
+                    if (distance < minDist && distance > 0.001f)
+                    {
+                        // Calculate penetration depth
+                        float penetration = minDist - distance;
+                        float3 normal = normalize(direction);
+                        
+                        // Calculate separation based on mass ratio
+                        float totalMass = particleA.mass + particleB.mass;
+                        float ratioA = particleB.mass / totalMass;
+                        
+                        // Separate particles (move our particle only)
+                        particleA.position -= normal * penetration * ratioA;
+                        
+                        // Collision response
+                        float3 relativeVelocity = particleB.velocity - particleA.velocity;
+                        float velAlongNormal = dot(relativeVelocity, normal);
+                        
+                        // Only apply impulse if particles are moving toward each other
+                        if (velAlongNormal < 0)
+                        {
+                            float impulse = -(1 + Elasticity) * velAlongNormal;
+                            impulse /= (1 / particleA.mass + 1 / particleB.mass);
+                            
+                            // Apply impulse to our particle only
+                            particleA.velocity -= normal * (impulse / particleA.mass);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        // Brute force approach - check all particles
+        for (int i = 0; i < ParticleCount; i++)
+        {
+            if (i == index)
+                continue;
+            
+            ParticleData particleB = ParticleBuffer[i];
+            float3 posB = particleB.position;
+            float radiusB = particleB.radius;
+            
+            // Calculate direction and distance
+            float3 direction = posB - posA;
+            float distance = length(direction);
+            float minDist = radiusA + radiusB;
+            
+            // If particles are overlapping
+            if (distance < minDist && distance > 0.001f)
+            {
+                // Calculate penetration depth
+                float penetration = minDist - distance;
+                float3 normal = normalize(direction);
+                
+                // Calculate separation based on mass ratio
+                float totalMass = particleA.mass + particleB.mass;
+                float ratioA = particleB.mass / totalMass;
+                
+                // Separate particles (move our particle only)
+                particleA.position -= normal * penetration * ratioA;
+                
+                // Collision response
+                float3 relativeVelocity = particleB.velocity - particleA.velocity;
+                float velAlongNormal = dot(relativeVelocity, normal);
+                
+                // Only apply impulse if particles are moving toward each other
+                if (velAlongNormal < 0)
+                {
+                    float impulse = -(1 + Elasticity) * velAlongNormal;
+                    impulse /= (1 / particleA.mass + 1 / particleB.mass);
+                    
+                    // Apply impulse to our particle only
+                    particleA.velocity -= normal * (impulse / particleA.mass);
+                }
+            }
+        }
+    }
+    
+    // Write updated particle back to buffer
+    ParticleBuffer[index] = particleA;
+}

@@ -1,0 +1,73 @@
+// UpdateGrid.compute
+#pragma kernel UpdateGrid
+
+struct ParticleData
+{
+    float3 position;
+    float3 velocity;
+    float3 force;
+    int typeIndex;
+    float mass;
+    float radius;
+    float padding; // Padding to match C# struct alignment
+};
+
+struct GridCellData
+{
+    int startIndex;
+    int count;
+};
+
+struct GridOccupancyData
+{
+    int cellIndex;
+    int particleIndex;
+};
+
+RWStructuredBuffer<ParticleData> ParticleBuffer;
+RWStructuredBuffer<GridCellData> GridCellBuffer;
+RWStructuredBuffer<GridOccupancyData> GridOccupancyBuffer;
+RWStructuredBuffer<int> GridCounterBuffer;
+int ParticleCount;
+float3 GridDimensions;
+float3 CellSize;
+float3 SimulationBounds;
+
+// Helper function to calculate grid cell index from world position
+int GetCellIndex(float3 position)
+{
+    // Adjust position to grid space (0 to gridDimension)
+    float3 gridPos = position + SimulationBounds * 0.5f;
+    gridPos /= CellSize;
+    
+    // Clamp to grid bounds
+    int3 cellPos = int3(gridPos);
+    cellPos = clamp(cellPos, int3(0, 0, 0), int3(GridDimensions) - int3(1, 1, 1));
+    
+    // Calculate 1D index from 3D position
+    return cellPos.x + cellPos.y * GridDimensions.x + cellPos.z * GridDimensions.x * GridDimensions.y;
+}
+
+[numthreads(64, 1, 1)]
+void UpdateGrid(uint3 id : SV_DispatchThreadID)
+{
+    uint index = id.x;
+    if (index >= (uint) ParticleCount)
+        return;
+    
+    // Get cell index for this particle
+    int cellIndex = GetCellIndex(ParticleBuffer[index].position);
+    
+    // Add particle to grid with atomic operations
+    int insertIndex;
+    InterlockedAdd(GridCounterBuffer[0], 1, insertIndex);
+    
+    // Store grid occupancy data
+    GridOccupancyData occupancy;
+    occupancy.cellIndex = cellIndex;
+    occupancy.particleIndex = index;
+    GridOccupancyBuffer[insertIndex] = occupancy;
+    
+    // Update grid cell counter (atomic to handle concurrent updates)
+    InterlockedAdd(GridCellBuffer[cellIndex].count, 1);
+}

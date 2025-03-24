@@ -3124,7 +3124,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1138113277
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3868,7 +3868,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SimulationSpeed: 1
-  totalCellCount: 1000
+  totalCellCount: 15000
   epidermalCellPercentage: 0.4
   muscleCellPercentage: 0.3
   digestiveCellPercentage: 0.2
@@ -3884,7 +3884,7 @@ MonoBehaviour:
   muscleCellMaterial: {fileID: 2100000, guid: 48029c085f7666f409a1f16e7658ddc8, type: 2}
   digestiveCellMaterial: {fileID: 2100000, guid: 48029c085f7666f409a1f16e7658ddc8, type: 2}
   nervousCellMaterial: {fileID: 2100000, guid: 48029c085f7666f409a1f16e7658ddc8, type: 2}
-  showConnections: 1
+  showConnections: 0
   visualizationMode: 0
   showEpidermalCells: 1
   showMuscleCells: 1

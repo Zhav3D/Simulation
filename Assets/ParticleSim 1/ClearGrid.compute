@@ -1,0 +1,23 @@
+// ClearGrid.compute
+#pragma kernel ClearGrid
+
+struct GridCellData
+{
+    int startIndex;
+    int count;
+};
+
+RWStructuredBuffer<GridCellData> GridCellBuffer;
+int GridCellCount;
+
+[numthreads(64, 1, 1)]
+void ClearGrid(uint3 id : SV_DispatchThreadID)
+{
+    uint index = id.x;
+    if (index >= (uint) GridCellCount)
+        return;
+    
+    // Reset grid cell data
+    GridCellBuffer[index].startIndex = 0;
+    GridCellBuffer[index].count = 0;
+}

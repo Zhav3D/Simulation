@@ -1,0 +1,42 @@
+// CountingShader.compute
+#pragma kernel CountParticleType
+
+struct ParticleData
+{
+    float3 position;
+    float3 velocity;
+    float3 force;
+    int typeIndex;
+    float mass;
+    float radius;
+};
+
+RWStructuredBuffer<ParticleData> ParticleBuffer;
+RWStructuredBuffer<int> IndirectArgsBuffer;
+int TargetType;
+int ParticleCount;
+
+[numthreads(1, 1, 1)]
+void CountParticleType(uint3 id : SV_DispatchThreadID)
+{
+    // Count particles of the target type
+    int count = 0;
+    for (int i = 0; i < ParticleCount; i++)
+    {
+        if (ParticleBuffer[i].typeIndex == TargetType)
+        {
+            count++;
+        }
+    }
+    
+    // Read existing values to preserve the index count
+    int indexCount = IndirectArgsBuffer[0];
+    
+    // Update indirect args buffer for instanced drawing
+    // Format: indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation
+    IndirectArgsBuffer[0] = indexCount; // Preserve the original mesh index count
+    IndirectArgsBuffer[1] = count; // Number of instances
+    IndirectArgsBuffer[2] = 0;
+    IndirectArgsBuffer[3] = 0;
+    IndirectArgsBuffer[4] = 0;
+}
