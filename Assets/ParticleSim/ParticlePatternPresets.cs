@@ -1,166 +1,223 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Static class containing recommended preset configurations for particle simulations.
-/// Can be used with InteractionMatrixGenerator or manually.
-/// </summary>
 public static class ParticlePatternPresets
 {
-    /// <summary>
-    /// Recommended particle counts for different patterns
-    /// </summary>
-    public static class RecommendedCounts
+    // Recommended counts for each pattern type
+    public static int GetRecommendedCounts(InteractionMatrixGenerator.PatternType patternType)
     {
-        public static int Random = 5;
-        public static int Clusters = 6;
-        public static int Chains = 6;
-        public static int PredatorPrey = 5;
-        public static int Crystalline = 8;
-        public static int Flocking = 7;
-        public static int Lenia = 10;
-        public static int Segregation = 6;
+        switch (patternType)
+        {
+            case InteractionMatrixGenerator.PatternType.Random:
+                return 5;
+
+            case InteractionMatrixGenerator.PatternType.Clusters:
+                return 6;
+
+            case InteractionMatrixGenerator.PatternType.Chains:
+                return 6;
+
+            case InteractionMatrixGenerator.PatternType.PredatorPrey:
+                return 5;
+
+            case InteractionMatrixGenerator.PatternType.Crystalline:
+                return 8;
+
+            case InteractionMatrixGenerator.PatternType.Flocking:
+                return 7;
+
+            case InteractionMatrixGenerator.PatternType.Lenia:
+                return 10;
+
+            case InteractionMatrixGenerator.PatternType.Segregation:
+                return 6;
+
+            default:
+                return 5;
+        }
     }
 
-    /// <summary>
-    /// Recommend simulation settings for a pattern type
-    /// </summary>
+    // Apply recommended simulation settings based on pattern type
     public static void ApplyRecommendedSettings(OptimizedParticleSimulation simulation, InteractionMatrixGenerator.PatternType patternType)
     {
         switch (patternType)
         {
             case InteractionMatrixGenerator.PatternType.Random:
-                simulation.simulationSpeed = 1.0f;
-                simulation.interactionStrength = 1.0f;
-                simulation.dampening = 0.95f;
-                simulation.minDistance = 0.5f;
-                simulation.bounceForce = 0.8f;
-                simulation.maxForce = 100f;
-                simulation.maxVelocity = 20f;
-                simulation.interactionRadius = 10f;
+                ApplyRandomSettings(simulation);
                 break;
 
             case InteractionMatrixGenerator.PatternType.Clusters:
-                simulation.simulationSpeed = 1.2f;
-                simulation.interactionStrength = 1.5f;
-                simulation.dampening = 0.9f;
-                simulation.minDistance = 0.6f;
-                simulation.bounceForce = 0.8f;
-                simulation.maxForce = 120f;
-                simulation.maxVelocity = 15f;
-                simulation.interactionRadius = 12f;
+                ApplyClusterSettings(simulation);
                 break;
 
             case InteractionMatrixGenerator.PatternType.Chains:
-                simulation.simulationSpeed = 1.1f;
-                simulation.interactionStrength = 2.0f;
-                simulation.dampening = 0.9f;
-                simulation.minDistance = 0.4f;
-                simulation.bounceForce = 0.8f;
-                simulation.maxForce = 150f;
-                simulation.maxVelocity = 18f;
-                simulation.interactionRadius = 15f;
+                ApplyChainSettings(simulation);
                 break;
 
             case InteractionMatrixGenerator.PatternType.PredatorPrey:
-                simulation.simulationSpeed = 1.5f;
-                simulation.interactionStrength = 2.0f;
-                simulation.dampening = 0.92f;
-                simulation.minDistance = 0.5f;
-                simulation.bounceForce = 0.9f;
-                simulation.maxForce = 120f;
-                simulation.maxVelocity = 25f;
-                simulation.interactionRadius = 10f;
+                ApplyPredatorPreySettings(simulation);
                 break;
 
             case InteractionMatrixGenerator.PatternType.Crystalline:
-                simulation.simulationSpeed = 0.8f;
-                simulation.interactionStrength = 3.0f;
-                simulation.dampening = 0.85f;
-                simulation.minDistance = 0.6f;
-                simulation.bounceForce = 0.5f;
-                simulation.maxForce = 200f;
-                simulation.maxVelocity = 15f;
-                simulation.interactionRadius = 8f;
+                ApplyCrystallineSettings(simulation);
                 break;
 
             case InteractionMatrixGenerator.PatternType.Flocking:
-                simulation.simulationSpeed = 1.8f;
-                simulation.interactionStrength = 1.2f;
-                simulation.dampening = 0.98f; // Less damping for smoother movement
-                simulation.minDistance = 0.4f;
-                simulation.bounceForce = 0.9f;
-                simulation.maxForce = 80f;
-                simulation.maxVelocity = 20f;
-                simulation.interactionRadius = 12f;
+                ApplyFlockingSettings(simulation);
                 break;
 
             case InteractionMatrixGenerator.PatternType.Lenia:
-                simulation.simulationSpeed = 0.8f;
-                simulation.interactionStrength = 1.5f;
-                simulation.dampening = 0.9f;
-                simulation.minDistance = 0.4f;
-                simulation.bounceForce = 0.7f;
-                simulation.maxForce = 100f;
-                simulation.maxVelocity = 12f;
-                simulation.interactionRadius = 15f;
+                ApplyLeniaSettings(simulation);
                 break;
 
             case InteractionMatrixGenerator.PatternType.Segregation:
-                simulation.simulationSpeed = 1.4f;
-                simulation.interactionStrength = 2.5f;
-                simulation.dampening = 0.85f;
-                simulation.minDistance = 0.6f;
-                simulation.bounceForce = 0.7f;
-                simulation.maxForce = 150f;
-                simulation.maxVelocity = 18f;
-                simulation.interactionRadius = 10f;
+                ApplySegregationSettings(simulation);
                 break;
         }
     }
 
-    /// <summary>
-    /// Get descriptive information about each pattern type
-    /// </summary>
+    private static void ApplyRandomSettings(OptimizedParticleSimulation simulation)
+    {
+        simulation.simulationSpeed = 1.0f;
+        simulation.collisionElasticity = 0.5f;
+        simulation.dampening = 0.97f;
+        simulation.interactionStrength = 1.0f;
+        simulation.minDistance = 0.5f;
+        simulation.bounceForce = 0.8f;
+        simulation.maxForce = 100f;
+        simulation.maxVelocity = 20f;
+        simulation.interactionRadius = 10f;
+    }
+
+    private static void ApplyClusterSettings(OptimizedParticleSimulation simulation)
+    {
+        simulation.simulationSpeed = 1.0f;
+        simulation.collisionElasticity = 0.3f;
+        simulation.dampening = 0.95f;
+        simulation.interactionStrength = 1.5f;
+        simulation.minDistance = 0.6f;
+        simulation.bounceForce = 0.7f;
+        simulation.maxForce = 80f;
+        simulation.maxVelocity = 15f;
+        simulation.interactionRadius = 8f;
+    }
+
+    private static void ApplyChainSettings(OptimizedParticleSimulation simulation)
+    {
+        simulation.simulationSpeed = 0.8f;
+        simulation.collisionElasticity = 0.7f;
+        simulation.dampening = 0.96f;
+        simulation.interactionStrength = 1.2f;
+        simulation.minDistance = 0.4f;
+        simulation.bounceForce = 0.9f;
+        simulation.maxForce = 70f;
+        simulation.maxVelocity = 12f;
+        simulation.interactionRadius = 6f;
+    }
+
+    private static void ApplyPredatorPreySettings(OptimizedParticleSimulation simulation)
+    {
+        simulation.simulationSpeed = 1.5f;
+        simulation.collisionElasticity = 0.6f;
+        simulation.dampening = 0.98f;
+        simulation.interactionStrength = 1.8f;
+        simulation.minDistance = 0.5f;
+        simulation.bounceForce = 0.8f;
+        simulation.maxForce = 120f;
+        simulation.maxVelocity = 25f;
+        simulation.interactionRadius = 12f;
+    }
+
+    private static void ApplyCrystallineSettings(OptimizedParticleSimulation simulation)
+    {
+        simulation.simulationSpeed = 0.7f;
+        simulation.collisionElasticity = 0.2f;
+        simulation.dampening = 0.9f;
+        simulation.interactionStrength = 2.0f;
+        simulation.minDistance = 0.7f;
+        simulation.bounceForce = 0.6f;
+        simulation.maxForce = 60f;
+        simulation.maxVelocity = 8f;
+        simulation.interactionRadius = 5f;
+    }
+
+    private static void ApplyFlockingSettings(OptimizedParticleSimulation simulation)
+    {
+        simulation.simulationSpeed = 1.2f;
+        simulation.collisionElasticity = 0.4f;
+        simulation.dampening = 0.99f;
+        simulation.interactionStrength = 1.0f;
+        simulation.minDistance = 0.5f;
+        simulation.bounceForce = 0.9f;
+        simulation.maxForce = 50f;
+        simulation.maxVelocity = 18f;
+        simulation.interactionRadius = 10f;
+    }
+
+    private static void ApplyLeniaSettings(OptimizedParticleSimulation simulation)
+    {
+        simulation.simulationSpeed = 0.8f;
+        simulation.collisionElasticity = 0.3f;
+        simulation.dampening = 0.93f;
+        simulation.interactionStrength = 1.6f;
+        simulation.minDistance = 0.6f;
+        simulation.bounceForce = 0.7f;
+        simulation.maxForce = 90f;
+        simulation.maxVelocity = 12f;
+        simulation.interactionRadius = 8f;
+    }
+
+    private static void ApplySegregationSettings(OptimizedParticleSimulation simulation)
+    {
+        simulation.simulationSpeed = 1.0f;
+        simulation.collisionElasticity = 0.5f;
+        simulation.dampening = 0.95f;
+        simulation.interactionStrength = 2.0f;
+        simulation.minDistance = 0.6f;
+        simulation.bounceForce = 0.8f;
+        simulation.maxForce = 100f;
+        simulation.maxVelocity = 15f;
+        simulation.interactionRadius = 7f;
+    }
+
+    // Get description for each pattern type
     public static string GetPatternDescription(InteractionMatrixGenerator.PatternType patternType)
     {
         switch (patternType)
         {
             case InteractionMatrixGenerator.PatternType.Random:
-                return "Random interactions with configurable symmetry and attraction bias. " +
-                       "A good starting point but often produces chaotic results unless fine-tuned.";
+                return "Creates a random interaction matrix with varying levels of attraction and repulsion. " +
+                       "Produces chaotic, unpredictable behaviors.";
 
             case InteractionMatrixGenerator.PatternType.Clusters:
-                return "Particles are grouped where members of the same group attract each other " +
-                       "while repelling other groups. Creates stable separated clusters.";
+                return "Generates groups of particles that self-attract and repel other groups. " +
+                       "Forms clear clusters of similar particles.";
 
             case InteractionMatrixGenerator.PatternType.Chains:
-                return "Creates chain-like structures by making certain pairs of particles " +
-                       "attract each other in a specific sequence, while repelling others.";
+                return "Creates chain-like structures where particles attract their neighbors in a sequence. " +
+                       "Forms long, linked structures like polymers or strings.";
 
             case InteractionMatrixGenerator.PatternType.PredatorPrey:
-                return "Implements a circular food chain where each particle type is attracted " +
-                       "to its 'prey' and repelled by its 'predator'. Creates dynamic chase patterns.";
+                return "Simulates predator-prey relationships with cyclic attraction and repulsion. " +
+                       "Creates dynamic chasing and fleeing behaviors.";
 
             case InteractionMatrixGenerator.PatternType.Crystalline:
-                return "Creates regular lattice-like arrangements through alternating attraction " +
-                       "and repulsion based on 'distance' in type space.";
+                return "Forms crystal-like structures with alternating attraction and repulsion. " +
+                       "Creates ordered, lattice-like arrangements.";
 
             case InteractionMatrixGenerator.PatternType.Flocking:
-                return "Models bird flocking behaviors with particles of the same family attracting " +
-                       "each other, plus designated 'leaders' that others follow.";
+                return "Creates flocking behaviors where similar particles align and move together. " +
+                       "Similar to bird flocks or fish schools with coordinated movement.";
 
             case InteractionMatrixGenerator.PatternType.Lenia:
-                return "Inspired by the Lenia cellular automaton, creates complex living system-like " +
-                       "behaviors with local attraction and medium-range repulsion.";
+                return "Inspired by cellular automata, creates complex emergent patterns. " +
+                       "Produces rich, organic-looking systems with potential for self-organization.";
 
             case InteractionMatrixGenerator.PatternType.Segregation:
-                return "Based on Schelling's segregation model, creates strong group identity with " +
-                       "optional 'bridge' particles that can connect different groups.";
+                return "Models segregation patterns with strong in-group attraction and out-group repulsion. " +
+                       "Demonstrates how simple preference rules can lead to large-scale segregation.";
 
             default:
-                return "Unknown pattern type.";
+                return "No description available for this pattern type.";
         }
     }
 }

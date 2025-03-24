@@ -130,6 +130,38 @@ public class OptimizedParticleSimulation : MonoBehaviour
         }
     }
 
+    // This is a public method to rebuild the interaction lookup table after rule changes
+    public void RebuildInteractionLookup()
+    {
+        // Clear and rebuild interaction lookup table
+        interactionLookup.Clear();
+
+        foreach (var rule in interactionRules)
+        {
+            interactionLookup[(rule.typeIndexA, rule.typeIndexB)] = rule.attractionValue;
+        }
+
+        // If using Jobs System, update the interaction matrix as well
+        if (useJobSystem && interactionMatrix.IsCreated)
+        {
+            int typeCount = particleTypes.Count;
+
+            // Update interaction matrix
+            for (int i = 0; i < typeCount; i++)
+            {
+                for (int j = 0; j < typeCount; j++)
+                {
+                    float attraction = 0f;
+                    if (interactionLookup.TryGetValue((i, j), out float value))
+                    {
+                        attraction = value;
+                    }
+                    interactionMatrix[i + j * typeCount] = attraction;
+                }
+            }
+        }
+    }
+
     private void SpawnParticles()
     {
         for (int typeIndex = 0; typeIndex < particleTypes.Count; typeIndex++)

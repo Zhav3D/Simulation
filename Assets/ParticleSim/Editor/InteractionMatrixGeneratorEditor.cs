@@ -49,36 +49,7 @@ public class InteractionMatrixGeneratorEditor : Editor
 
         if (generator.generateParticleTypes)
         {
-            int baseParticleCount = 0;
-
-            switch (generator.patternType)
-            {
-                case InteractionMatrixGenerator.PatternType.Random:
-                    baseParticleCount = ParticlePatternPresets.RecommendedCounts.Random;
-                    break;
-                case InteractionMatrixGenerator.PatternType.Clusters:
-                    baseParticleCount = ParticlePatternPresets.RecommendedCounts.Clusters;
-                    break;
-                case InteractionMatrixGenerator.PatternType.Chains:
-                    baseParticleCount = ParticlePatternPresets.RecommendedCounts.Chains;
-                    break;
-                case InteractionMatrixGenerator.PatternType.PredatorPrey:
-                    baseParticleCount = ParticlePatternPresets.RecommendedCounts.PredatorPrey;
-                    break;
-                case InteractionMatrixGenerator.PatternType.Crystalline:
-                    baseParticleCount = ParticlePatternPresets.RecommendedCounts.Crystalline;
-                    break;
-                case InteractionMatrixGenerator.PatternType.Flocking:
-                    baseParticleCount = ParticlePatternPresets.RecommendedCounts.Flocking;
-                    break;
-                case InteractionMatrixGenerator.PatternType.Lenia:
-                    baseParticleCount = ParticlePatternPresets.RecommendedCounts.Lenia;
-                    break;
-                case InteractionMatrixGenerator.PatternType.Segregation:
-                    baseParticleCount = ParticlePatternPresets.RecommendedCounts.Segregation;
-                    break;
-            }
-
+            int baseParticleCount = ParticlePatternPresets.GetRecommendedCounts(generator.patternType);
             int totalParticles = Mathf.RoundToInt(baseParticleCount * generator.particleSpawnMultiplier * 50);
 
             EditorGUILayout.LabelField($"Particle Types: {baseParticleCount}");
