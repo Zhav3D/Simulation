@@ -28,7 +28,7 @@ public class OptimizedParticleSimulation : MonoBehaviour
     }
 
     [Header("Simulation Settings")]
-    [SerializeField, Range(0f, 5f)] private float simulationSpeed = 1.0f;
+    [Range(0f, 5f)] public float simulationSpeed = 1.0f;
     [Range(0f, 1f)] public float collisionElasticity = 0.5f;
     public Vector3 simulationBounds = new Vector3(10f, 10f, 10f);
     public float dampening = 0.95f; // Air resistance / friction

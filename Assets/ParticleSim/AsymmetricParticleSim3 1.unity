@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 246224068}
   - component: {fileID: 246224067}
   - component: {fileID: 246224069}
+  - component: {fileID: 246224070}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -149,94 +150,113 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 862db78c4a2edf041aa2546c82083027, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  simulationSpeed: 1
+  simulationSpeed: 1.8
   collisionElasticity: 0.5
   simulationBounds: {x: 100, y: 100, z: 100}
-  dampening: 0.9999
-  interactionStrength: 0.2
-  minDistance: 0.5
-  bounceForce: 0.95
-  maxForce: 100
-  maxVelocity: 10
-  interactionRadius: 1000
+  dampening: 0.98
+  interactionStrength: 1.2
+  minDistance: 0.4
+  bounceForce: 0.9
+  maxForce: 80
+  maxVelocity: 20
+  interactionRadius: 12
   cellSize: 2.5
   useGridPartitioning: 0
   useJobSystem: 1
   particleTypes:
-  - name: Red
-    color: {r: 1, g: 0.079807915, b: 0, a: 1}
-    mass: 1
-    radius: 0.1
-    spawnAmount: 500
-  - name: Yellow
-    color: {r: 1, g: 0.9735143, b: 0, a: 1}
-    mass: 1
-    radius: 0.1
-    spawnAmount: 100
-  - name: Green
-    color: {r: 0.10298407, g: 1, b: 0, a: 1}
-    mass: 1
-    radius: 0.1
-    spawnAmount: 1000
-  - name: Pink
-    color: {r: 0.7363515, g: 0, b: 1, a: 1}
+  - name: Flock0_0
+    color: {r: 0.85539466, g: 0.21280643, b: 0.31277642, a: 1}
+    mass: 2
+    radius: 0.16000001
+    spawnAmount: 50
+  - name: Flock1_1
+    color: {r: 0.8876302, g: 0.8593811, b: 0.24546322, a: 1}
     mass: 1
     radius: 0.1
     spawnAmount: 300
-  - name: Blue
-    color: {r: 0, g: 0.46388245, b: 1, a: 1}
+  - name: Flock2_2
+    color: {r: 0.12316564, g: 0.91228634, b: 0.90200806, a: 1}
     mass: 1
     radius: 0.1
-    spawnAmount: 20
+    spawnAmount: 300
+  - name: Flock0_3
+    color: {r: 0.8250506, g: 0.18023121, b: 0.2064549, a: 1}
+    mass: 2
+    radius: 0.16000001
+    spawnAmount: 50
+  - name: Flock1_4
+    color: {r: 0.8663128, g: 0.93699044, b: 0.22856027, a: 1}
+    mass: 1
+    radius: 0.1
+    spawnAmount: 300
+  - name: Flock2_5
+    color: {r: 0.08245369, g: 0.89386547, b: 0.98105353, a: 1}
+    mass: 1
+    radius: 0.1
+    spawnAmount: 300
+  - name: Flock0_6
+    color: {r: 0.81371206, g: 0.14161554, b: 0.33980244, a: 1}
+    mass: 2
+    radius: 0.16000001
+    spawnAmount: 50
   interactionRules:
   - typeIndexA: 0
+    typeIndexB: 3
+    attractionValue: 0.8
+  - typeIndexA: 0
+    typeIndexB: 6
+    attractionValue: 0.8
+  - typeIndexA: 1
+    typeIndexB: 4
+    attractionValue: 0.8
+  - typeIndexA: 2
+    typeIndexB: 5
+    attractionValue: 0.8
+  - typeIndexA: 3
+    typeIndexB: 0
+    attractionValue: 0.8
+  - typeIndexA: 3
+    typeIndexB: 6
+    attractionValue: 0.8
+  - typeIndexA: 4
     typeIndexB: 1
+    attractionValue: 0.8
+  - typeIndexA: 5
+    typeIndexB: 2
+    attractionValue: 0.8
+  - typeIndexA: 6
+    typeIndexB: 0
+    attractionValue: 0.8
+  - typeIndexA: 6
+    typeIndexB: 3
+    attractionValue: 0.8
+  - typeIndexA: 2
+    typeIndexB: 0
+    attractionValue: 1
+  - typeIndexA: 3
+    typeIndexB: 0
+    attractionValue: 1
+  - typeIndexA: 4
+    typeIndexB: 0
+    attractionValue: 1
+  - typeIndexA: 5
+    typeIndexB: 0
+    attractionValue: 1
+  - typeIndexA: 6
+    typeIndexB: 0
     attractionValue: 1
   - typeIndexA: 0
-    typeIndexB: 2
-    attractionValue: 0
-  - typeIndexA: 2
-    typeIndexB: 0
-    attractionValue: -0.6
-  - typeIndexA: 1
-    typeIndexB: 0
-    attractionValue: 0.3
-  - typeIndexA: 1
-    typeIndexB: 2
-    attractionValue: 1
-  - typeIndexA: 2
     typeIndexB: 1
-    attractionValue: -0.2
-  - typeIndexA: 2
-    typeIndexB: 2
-    attractionValue: 0
-  - typeIndexA: 1
-    typeIndexB: 1
-    attractionValue: 0
-  - typeIndexA: 2
-    typeIndexB: 3
-    attractionValue: 0.2
-  - typeIndexA: 2
-    typeIndexB: 4
-    attractionValue: -0.1
-  - typeIndexA: 3
-    typeIndexB: 0
-    attractionValue: 0
-  - typeIndexA: 3
-    typeIndexB: 3
-    attractionValue: 0.1
-  - typeIndexA: 4
-    typeIndexB: 3
-    attractionValue: 3
-  - typeIndexA: 4
-    typeIndexB: 4
-    attractionValue: 0.1
-  - typeIndexA: 3
-    typeIndexB: 4
-    attractionValue: -0.1
+    attractionValue: -1
   - typeIndexA: 4
     typeIndexB: 1
-    attractionValue: -0.3
+    attractionValue: -1
+  - typeIndexA: 5
+    typeIndexB: 1
+    attractionValue: -1
+  - typeIndexA: 6
+    typeIndexB: 1
+    attractionValue: -1
   particlePrefab: {fileID: 8385162901755805872, guid: 1182d3be23cfeb14aa737eef85a8733c, type: 3}
 --- !u!4 &246224068
 Transform:
@@ -265,12 +285,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13cc0d2a825c5c345bf4758619be5265, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  patternType: 3
+  patternType: 5
   generateOnAwake: 1
+  generateParticleTypes: 1
+  applyRecommendedSettings: 1
+  particleSpawnMultiplier: 5
+  particleRadiusMultiplier: 0.2
   attractionBias: 0
   symmetryFactor: 0.1
   sparsity: 0.2
   noiseFactor: 0.1
+--- !u!114 &246224070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246224066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b650dbe02c62c242991d4f4a809b96f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -368,9 +404,179 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1001 &1263712670
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 606649722984901848, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+      propertyPath: m_Name
+      value: RosettaUIRootUIToolkit
+      objectReference: {fileID: 0}
+    - target: {fileID: 606649722984901848, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2287126204365735152, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2287126204365735152, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2287126204365735152, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2287126204365735152, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2287126204365735152, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2287126204365735152, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2287126204365735152, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2287126204365735152, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2287126204365735152, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2287126204365735152, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 4ed1865184a851c448a44589b9f302b9, type: 3}
+--- !u!1 &1479185282
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1479185285}
+  - component: {fileID: 1479185284}
+  - component: {fileID: 1479185283}
+  - component: {fileID: 1479185286}
+  m_Layer: 0
+  m_Name: Camera
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!81 &1479185283
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1479185282}
+  m_Enabled: 1
+--- !u!20 &1479185284
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1479185282}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 60
+  orthographic: 0
+  orthographic size: 5
+  m_Depth: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+--- !u!4 &1479185285
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1479185282}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -185.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1479185286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1479185282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f976124e95f2535488b06e1beeac8132, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MovementSpeed: 10
+  m_RotationSpeed: 20
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 705507995}
   - {fileID: 246224068}
+  - {fileID: 1263712670}
+  - {fileID: 1479185285}
